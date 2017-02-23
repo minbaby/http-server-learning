@@ -34,16 +34,9 @@ while (true) {
     }
 
     while ($socket = stream_socket_accept($server)) {
-        $str = "";
-        $str = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
-
-        logConsole($str);
-
-        $ss = handleData($str);
-
-        logConsole("response:" . $ss);
-        fwrite($socket, $ss, strlen($ss));
-
+        $request = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
+        $response = parseRequestAndReturnResponse($request);
+        fwrite($socket, $response, strlen($response));
         fclose($socket);
     }
 
@@ -55,16 +48,17 @@ function logConsole($msg)
     echo sprintf("[%s] %s %s", date("Y-m-d H:i:s"), $msg, PHP_EOL);
 }
 
-function handleData($content)
+function parseRequestAndReturnResponse($content)
 {
+    logConsole("Request" . $content);
+
     $response = 'HTTP/1.1 200 OK' . CRLF;
 
-    $header = [
-        'Content-Type' => 'text/html; charset=utf-8',
-        'X-Server' => "minbaby/0.1",
-    ];
+    $header = ['Content-Type' => 'text/html; charset=utf-8', 'X-Server' => "minbaby/0.1",];
 
     $response .= implodeKeyValue($header);
+
+    logConsole("response:" . $response);
 
     return $response;
 }
