@@ -14,6 +14,7 @@
 define("HTTP_IP", "127.0.0.1");     // 绑定 ip
 define("HTTP_PORT", "9876");        // 端口
 define("PACKET_SIZE", 1500);
+define("CRLF", "\r\n");
 
 
 //var_dump(stream_get_transports());die();
@@ -34,23 +35,46 @@ while (true) {
 
     while ($socket = stream_socket_accept($server)) {
         $str = "";
-        $str = stream_socket_recvfrom($socket, PACKET_SIZE);
+        $str = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
+
         logConsole($str);
 
-        $ss = <<<EOF
-HTTP/1.1 200 OK
-Content-Type: text/html; charset=utf-8
-EOF;
+        $ss = handleData($str);
 
+        logConsole("response:" . $ss);
         fwrite($socket, $ss, strlen($ss));
 
         fclose($socket);
     }
 
-    fclose($server);
+    stream_socket_shutdown($server, STREAM_SHUT_RDWR);
 }
 
 function logConsole($msg)
 {
     echo sprintf("[%s] %s %s", date("Y-m-d H:i:s"), $msg, PHP_EOL);
+}
+
+function handleData($content)
+{
+    $response = 'HTTP/1.1 200 OK' . CRLF;
+
+    $header = [
+        'Content-Type' => 'text/html; charset=utf-8',
+        'X-Server' => "minbaby/0.1",
+    ];
+
+    $response .= implodeKeyValue($header);
+
+    return $response;
+}
+
+function implodeKeyValue($data)
+{
+    $str = '';
+    foreach ($data as $key => $value) {
+        $str .= sprintf("%s:%s " . CRLF, $key, $value);
+    }
+
+    return $str;
 }
