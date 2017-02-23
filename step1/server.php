@@ -40,7 +40,7 @@ while (true) {
         fclose($socket);
     }
 
-    stream_socket_shutdown($server, STREAM_SHUT_RDWR);
+    fclose($server);
 }
 
 function logConsole($msg)
@@ -54,12 +54,14 @@ function parseRequestAndReturnResponse($content)
 
     $response = 'HTTP/1.1 200 OK' . CRLF;
 
-    $header = ['Content-Type' => 'text/html; charset=utf-8', 'X-Server' => "minbaby/0.1",];
+    $header = [
+        'Content-Type' => 'text/html; charset=utf-8',
+        'X-Server' => "minbaby/0.1",
+    ];
 
     $response .= implodeKeyValue($header);
 
     logConsole("response:" . $response);
-
     return $response;
 }
 
