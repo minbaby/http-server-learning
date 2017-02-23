@@ -21,27 +21,35 @@ define("CRLF", "\r\n");
 
 $url = sprintf("tcp://%s:%s", HTTP_IP, HTTP_PORT);
 
+//如果 stream_socket_accept 超时，就会终止监听，那么只需要继续 stream_socket_accept 即可
+
+echo date("Y-m-d H:i:s"), PHP_EOL;
+echo $url, PHP_EOL;
+
+$errno = $errstr = null;
+$server = stream_socket_server($url, $errno, $errstr);
+if (!$server) {
+    logConsole(sprintf("%s (%s)", $errstr, $errno));
+    die(255);
+}
+
 while (true) {
-    echo date("Y-m-d H:i:s"), PHP_EOL;
-    echo $url, PHP_EOL;
 
-    $errno = $errstr = null;
-    $server = stream_socket_server($url, $errno, $errstr);
+    // 这里需要处理何时推出
 
-    if (!$server) {
-        logConsole(sprintf("%s (%s)", $errstr, $errno));
-        die(255);
-    }
-
-    while ($socket = stream_socket_accept($server)) {
+    // stream_socket_accept 超时的时候回产生一个 warning， 这里需要@ 抑制错误
+    while ($socket = @stream_socket_accept($server, 5)) {
         $request = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
         $response = parseRequestAndReturnResponse($request);
         fwrite($socket, $response, strlen($response));
         fclose($socket);
     }
 
-    fclose($server);
+    logConsole("loop finish");
 }
+
+fclose($server);
+
 
 function logConsole($msg)
 {
