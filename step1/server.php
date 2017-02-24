@@ -16,6 +16,7 @@ define("HTTP_PORT", "9876");        // 端口
 define("PACKET_SIZE", 1500);
 define("CRLF", "\r\n");
 
+$serverData = []; // info
 
 //var_dump(stream_get_transports());die();
 
@@ -34,11 +35,11 @@ if (!$server) {
 }
 
 while (true) {
-
     // 这里需要处理何时推出
-
     // stream_socket_accept 超时的时候回产生一个 warning， 这里需要@ 抑制错误
-    while ($socket = @stream_socket_accept($server, 5)) {
+    while ($socket = @stream_socket_accept($server)) {
+        global $serverData;
+        $serverData = [];
         $request = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
         $response = parseRequestAndReturnResponse($request);
         fwrite($socket, $response, strlen($response));
@@ -56,20 +57,26 @@ function logConsole($msg)
     echo sprintf("[%s] %s %s", date("Y-m-d H:i:s"), $msg, PHP_EOL);
 }
 
-function parseRequestAndReturnResponse($content)
+function parseRequestAndReturnResponse($request)
 {
-    logConsole("Request" . $content);
+    logConsole("Request：" . $request);
 
-    $response = 'HTTP/1.1 200 OK' . CRLF;
+    global $serverData;
+    $serverData = parseRequest($request);
+
+    $content = buildPage();
 
     $header = [
         'Content-Type' => 'text/html; charset=utf-8',
+        'Content-Length' => mb_strlen($content),
         'X-Server' => "minbaby/0.1",
     ];
 
-    $response .= implodeKeyValue($header);
+    $response = 'HTTP/1.1 200 OK' . CRLF
+                 . implodeKeyValue($header) .CRLF
+                 . $content;
 
-    logConsole("response:" . $response);
+//    logConsole("response:" . $response);
     return $response;
 }
 
@@ -81,4 +88,72 @@ function implodeKeyValue($data)
     }
 
     return $str;
+}
+
+function buildPage()
+{
+    global $serverData;
+    return sprintf("<h1>Time: %s-%s</h1>", time(), array_get($serverData, 'get.index', 'null'));
+}
+
+/*
+ * 以换行分割，第一行必定为 ACTION PATH HTTP.VERSION
+ */
+function parseRequest($request)
+{
+    $arr = array_filter(explode(CRLF, $request));
+    $ci = [];
+
+    //parse 第一条
+    list($ci['method'], $ci['path'], $ci['version']) = explode(" ", $arr[0]);
+    array_shift($arr);
+
+    foreach ($arr as $value) {
+        list($key, $val) = explode(":", $value);
+        if ($key == 'Cookie') {
+            // 特殊处理
+            $tmp = explode(";", $val);
+            foreach ($tmp as $item) {
+                list($k, $v) = explode("=", $item);
+                $ci['cookie'][trim($k)] = trim($v);
+            }
+            continue;
+        }
+        $ci[trim($key)] = trim($val);
+    }
+
+    foreach ($ci as $key => &$val) {
+        is_string($val) && trim($val);
+        // 解析 path
+        if ($key == 'path' && false !== strpos($val, '?')) {
+            list($_, $param) = explode("?", $val);
+            foreach (explode("&", $param) as $item) {
+                list($k, $v) = explode("=", $item);
+                $ci['get'][$k] = $v;
+            }
+        }
+    }
+    return $ci;
+}
+
+function array_get($arr, $key, $default = '')
+{
+    if (is_null($key)) {
+        return $default;
+    }
+
+    if (isset($arr[$key])) {
+        return $arr[$key];
+    }
+
+    $segs = explode('.', $key);
+    while ($seg = array_shift($segs)) {
+        if (isset($arr[$seg])) {
+            $arr = $arr[$seg];
+        } else {
+            return $default;
+        }
+    }
+
+    return $arr;
 }
