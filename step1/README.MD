@@ -10,10 +10,10 @@
 
 ## 需要实现的功能点
 
-- [ ] tcp 交互
-- [ ] 解析 http request
+- [x] tcp 交互 (socket/bind/listen/accept)
+- [x] 解析 http request
 - [ ] 处理 URL 路由
-- [ ] 响应 http response
+- [x] 响应 http response
 
 注：
 不考虑过于复杂的东西，只实现 GET
