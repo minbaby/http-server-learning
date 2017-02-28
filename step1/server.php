@@ -13,14 +13,11 @@
 
 define("HTTP_IP", "127.0.0.1");     // 绑定 ip
 define("HTTP_PORT", "9876");        // 端口
+define("ROOT_PATH", "/");   // 指定浏览目录
 define("PACKET_SIZE", 1500);
 define("CRLF", "\r\n");
 
-define("ROOT_PATH", "/");
-
 $serverData = []; // info
-
-//var_dump(stream_get_transports());die();
 
 $url = sprintf("tcp://%s:%s", HTTP_IP, HTTP_PORT);
 
