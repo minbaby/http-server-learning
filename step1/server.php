@@ -16,6 +16,8 @@ define("HTTP_PORT", "9876");        // 端口
 define("PACKET_SIZE", 1500);
 define("CRLF", "\r\n");
 
+define("ROOT_PATH", "/tmp");
+
 $serverData = []; // info
 
 //var_dump(stream_get_transports());die();
@@ -40,7 +42,7 @@ while (true) {
     while ($socket = @stream_socket_accept($server)) {
         global $serverData;
         $serverData = [];
-        $request = stream_socket_recvfrom($socket, PACKET_SIZE); // 这里怎么处理（需要接受参数数据）
+        $request = stream_socket_recvfrom($socket, PACKET_SIZE); // TODO 这里怎么处理（需要接受参数数据）
         $response = parseRequestAndReturnResponse($request);
         fwrite($socket, $response, strlen($response));
         fclose($socket);
@@ -64,7 +66,40 @@ function parseRequestAndReturnResponse($request)
     global $serverData;
     $serverData = parseRequest($request);
 
-    $content = buildPage();
+    // 解析目录
+    $content = "<pre>";
+
+    $path = ROOT_PATH . $serverData['path'];
+    logConsole("handle:" . $path);
+    if (is_file($path) || is_dir($path)) {
+        $iterator = new DirectoryIterator(ROOT_PATH . $serverData['path']);
+        foreach ($iterator as $fileInfo) {
+            if ($fileInfo->getFilename() == '.') {
+                continue;
+            }
+
+            if ($fileInfo->isDir()) {
+                $content .= sprintf("[%10s] [%-15s] <a href='%s'>%s/</a><br>" . PHP_EOL,
+                                    $fileInfo->getSize(),
+                                    date("Y-m-d H:i:s", $fileInfo->getMTime()),
+                                    $fileInfo->getFilename(),
+                                    $fileInfo->getFilename()
+                );
+            } else {
+                $content .= sprintf("[%10s] [%-15s] <a href='%s'>%s</a><br>" . PHP_EOL,
+                                    $fileInfo->getSize(),
+                                    date("Y-m-d H:i:s", $fileInfo->getMTime()),
+                                    $fileInfo->getFilename(),
+                                    $fileInfo->getFilename()
+                );
+            }
+        }
+    } else {
+        $content .= buildPage();
+    }
+
+
+    $content .= "</pre>";
 
     $header = [
         'Content-Type' => 'text/html; charset=utf-8',
