@@ -16,7 +16,7 @@ define("HTTP_PORT", "9876");        // 端口
 define("PACKET_SIZE", 1500);
 define("CRLF", "\r\n");
 
-define("ROOT_PATH", "/tmp");
+define("ROOT_PATH", "/");
 
 $serverData = []; // info
 
@@ -67,11 +67,11 @@ function parseRequestAndReturnResponse($request)
     $serverData = parseRequest($request);
 
     // 解析目录
-    $content = "<pre>";
-
+    $content = "";
     $path = ROOT_PATH . $serverData['path'];
     logConsole("handle:" . $path);
-    if (is_file($path) || is_dir($path)) {
+    if (is_dir($path)) {
+        $content = "<pre>";
         $iterator = new DirectoryIterator(ROOT_PATH . $serverData['path']);
         foreach ($iterator as $fileInfo) {
             if ($fileInfo->getFilename() == '.') {
@@ -79,27 +79,27 @@ function parseRequestAndReturnResponse($request)
             }
 
             if ($fileInfo->isDir()) {
-                $content .= sprintf("[%10s] [%-15s] <a href='%s'>%s/</a><br>" . PHP_EOL,
-                                    $fileInfo->getSize(),
-                                    date("Y-m-d H:i:s", $fileInfo->getMTime()),
-                                    $fileInfo->getFilename(),
-                                    $fileInfo->getFilename()
-                );
+                $url = implode(DIRECTORY_SEPARATOR, [$serverData['path'], $fileInfo->getFilename()])
+                       . ($fileInfo->isDir() ? "/" : "");
             } else {
-                $content .= sprintf("[%10s] [%-15s] <a href='%s'>%s</a><br>" . PHP_EOL,
-                                    $fileInfo->getSize(),
-                                    date("Y-m-d H:i:s", $fileInfo->getMTime()),
-                                    $fileInfo->getFilename(),
-                                    $fileInfo->getFilename()
-                );
+                $url = $fileInfo->getFilename();
             }
+
+            $content .= sprintf(
+                "[%10s] [%-15s] <a href='%s'>%s%s</a><br>" . PHP_EOL,
+                $fileInfo->getSize(),
+                date("Y-m-d H:i:s", $fileInfo->getMTime()),
+                $url,
+                $fileInfo->getFilename(),
+                $fileInfo->isDir() ? "/" : ""
+            );
         }
+        $content .= "</pre>";
+    } elseif (is_file($path)) {
+        $content = file_get_contents($path);
     } else {
         $content .= buildPage();
     }
-
-
-    $content .= "</pre>";
 
     $header = [
         'Content-Type' => 'text/html; charset=utf-8',
@@ -142,6 +142,7 @@ function parseRequest($request)
     //parse 第一条
     list($ci['method'], $ci['path'], $ci['version']) = explode(" ", $arr[0]);
     array_shift($arr);
+    $ci['path'] = rtrim($ci['path'], '/');
 
     foreach ($arr as $value) {
         list($key, $val) = explode(":", $value);
