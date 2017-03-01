@@ -43,3 +43,14 @@ define("HTTP_IP", "127.0.0.1");     // 绑定 ip
 define("HTTP_PORT", "9876");        // 端口
 define("ROOT_PATH", "/");   // 指定浏览目录
 ```
+
+## Socket Errors (http://php.net/manual/zh/sockets.errors.php)
+
+```
+Socket扩展编写的目的是提供一个面向功能强大的BSD Socket的可用的接口。
+它能确保这些函数在Win32和Unix平台上都能很好的工作。 
+在特定条件下，大部分socket函数如果发生错误都会发出一个 E_WARNING信息描述错误内容。
+有时可能并不会如开发者所愿。例如，因为连接突然中断， socket_read()函数可能会突然发出一个 E_WARNING。 
+通常会使用@操作符来压制异常，然后在程序中用socket_last_error()来捕获错误代码。 
+你可以调用socket_strerror()函数通过错误代码获取错误描述。查看函数描述获取更多信息。
+```
