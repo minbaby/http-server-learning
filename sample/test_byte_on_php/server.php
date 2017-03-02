@@ -27,40 +27,94 @@ if ($flags == false) {
 }
 
 // 这里如果 accept 之后，是可以无限 get 数据的，直到 socket close
-while (($accettSocket = socket_accept($socket)) !== false) {
-    echo time(), PHP_EOL;
-    socket_write($accettSocket, 'HEHE', strlen('HEHE'));
-
-    $total = '';
-    $len = 0;
+// 需要考虑一个问题， 如果三个包一起发来， 那就要处理这个问题了！！！！
+while (($acceptSocket = socket_accept($socket)) !== false) {
+    // 基本思路， 从 socket 读取定义的头长度， 然后再从 socket 中读取定义的数据长度。
+    // 如果 读不到想要的长度呢？
+    $socketBuffer = new SocketBuf();
+    $socketBuffer->reset();
     while (true) {
-        // 1读取字节
-        $str = socket_read($accettSocket, 1);
-        if (false === $str) {
+        $buf = socket_read($acceptSocket, 1024);
+
+        if (false === $buf) {
             $errorCode = socket_last_error($socket);
             $errorMessage = socket_strerror($errorCode);
             echo sprintf("(%s) %s", $errorCode, $errorMessage);
             die(-2);
         }
 
-        $total .= $str;
-        if (strlen($str) == 0) {
+        if (strlen($buf) == 0) {
+            // 读不到数据
+            echo "读不到数据", PHP_EOL;
+            echo sprintf("len-%s\n", strlen($buf));
             break;
-        } elseif (strlen($total) < 4) {
-            continue;
-        } elseif (strlen($total) == 4) {
-            $ret = unpack('ilen/', $total);
-            $len = $ret['len'];
-        } elseif (strlen($total) == $len + 4) {
-            // 读完了，输出；
-            echo substr($total, 4), "-Done", PHP_EOL;
-            $total = '';
-            $len = 0;
-        } else {
-            echo "FUCK-ELSE", PHP_EOL;
+        }
+
+        $socketBuffer->add($buf);
+
+        while (!empty($body = $socketBuffer->getBody())) {
+            echo 'body=> ', $body, PHP_EOL;
         }
     }
     echo "Done...", PHP_EOL;
 }
 
 socket_close($socket);
+
+class SocketBuf
+{
+    private $headerSize = 4;
+
+    private $header = 0;
+
+    private $body = [];
+
+    private $buffer = "";
+
+    const HEADER_LEN = 4;
+
+    public function add($buf)
+    {
+        echo "+ => " . $buf, PHP_EOL;
+
+        $this->buffer .= $buf;
+
+        if (strlen($this->buffer) >= self::HEADER_LEN && $this->header === 0) {
+            $unpack = unpack('isize/', $this->buffer);// 这里需要截取需要的那一部分么？
+            $this->header = $unpack['size'];
+        } else {
+            if (strlen($this->buffer) > $this->header + self::HEADER_LEN) {
+                // 这个。。是缓冲内存多于一个包长度
+                $this->body[] = substr($this->buffer, self::HEADER_LEN, $this->header);// 先解析一个包
+                $this->buffer = substr($this->buffer, $this->header + self::HEADER_LEN);
+
+                echo '+', $this->buffer, "==>buffer", PHP_EOL;
+
+                // 解析剩下的可能的包
+                while (strlen($this->buffer) >= $this->header + self::HEADER_LEN) {
+                    $unpack = unpack('isize/', $this->buffer); // 这里需要截取需要的那一部分么？
+                    $this->header = $unpack['size'];
+                    $this->body[] = substr($this->buffer, self::HEADER_LEN, $this->header);// 先解析一个包
+                    $this->buffer = substr($this->buffer, $this->header + self::HEADER_LEN);
+                }
+            } elseif (strlen($this->buffer) < $this->header + self::HEADER_LEN) {
+                // 包还没有完成 不处理
+            } else {
+                // 刚好接受到需要的数据
+                $this->body[] = substr($this->buffer, self::HEADER_LEN);
+            }
+        }
+    }
+
+    public function reset()
+    {
+        $this->header = 0;
+        $this->body = [];
+        $this->buffer = "";
+    }
+
+    public function getBody()
+    {
+        return array_shift($this->body);
+    }
+}
