@@ -9,6 +9,6 @@
 
 # TODO
 
-- rpc ?
+- rpc ? [参考](http://mp.weixin.qq.com/s?__biz=MzAxMTEyOTQ5OQ==&mid=2650610547&idx=1&sn=2cae08dbf62d9a6c2f964ffd440c0077)
 - websocket ?
 - tcp 拆包？
