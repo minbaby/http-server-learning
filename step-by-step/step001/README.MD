@@ -21,7 +21,7 @@
 
 ## HTTP 流程
 
-![http 流程](../static/httpd_proc.jpg)
+![http 流程](../../static/httpd_proc.jpg)
 
 
 ## 说明

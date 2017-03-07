@@ -9,6 +9,13 @@
 
 # TODO
 
-- rpc ? [参考](http://mp.weixin.qq.com/s?__biz=MzAxMTEyOTQ5OQ==&mid=2650610547&idx=1&sn=2cae08dbf62d9a6c2f964ffd440c0077)
+- rpc
 - websocket ?
 - tcp 拆包？
+
+
+
+# 重要参考文档
+
+- [Fast portable non-blocking network programming with Libevent](http://www.wangafu.net/~nickm/libevent-book/TOC.html)
+- [RPC 的概念模型与实现解析](http://mp.weixin.qq.com/s?__biz=MzAxMTEyOTQ5OQ==&mid=2650610547&idx=1&sn=2cae08dbf62d9a6c2f964ffd440c0077)
