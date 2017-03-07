@@ -4,7 +4,6 @@
 // 这里处理 fork 一个子进程， 然后由父进程处理进程。
 // kill -s USR1 `ps -ef | grep parent | awk '{print $2}' | head -n 1`
 
-
 $signs = [
     SIGUSR1 => 'SIGUSR1',
     SIGUSR2 => 'SIGUSR2',
@@ -34,13 +33,10 @@ $pid = pcntl_fork();
 if ($pid === 0) {
     echo "子", "-pid-", posix_getpid(), PHP_EOL;
 
-    $pids[] = posix_getpid();
     @cli_set_process_title("php-fork-children"); // osx 不支持
 
     while (true) {
-//        echo 'do-', time(), PHP_EOL;
-//        usleep(500 * 1000);
-        sleep(20);
+        sleep(10);
         pcntl_signal_dispatch();
     }
 } elseif ($pid === -1) {
@@ -51,8 +47,6 @@ if ($pid === 0) {
     $status = "";
     register();
     while (true) {
-        //        echo 'do-', time(), PHP_EOL;
-        //        usleep(500 * 1000);
         sleep(10);
         pcntl_signal_dispatch();
     }
