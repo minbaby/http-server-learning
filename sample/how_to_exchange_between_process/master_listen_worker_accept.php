@@ -9,7 +9,6 @@ function logConsole($type, $msg)
     echo sprintf("[%s] [%s] %s %s", date("Y-m-d H:i:s"), $type, $msg, PHP_EOL);
 }
 
-
 $errno = $errstr = null;
 $server = stream_socket_server("tcp://127.0.0.1:9876", $errno, $errstr);
 if (!$server) {
@@ -33,7 +32,6 @@ function worker($server, $i)
         logConsole("child", "loop finish");
     }
 }
-
 
 $pid = pcntl_fork();
 
