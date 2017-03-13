@@ -25,7 +25,7 @@ class Master
         $this->ip = $ip;
         $this->port = $port;
 
-        @cli_set_process_title("HttpMaster");
+        @cli_set_process_title("[PHP]HttpMaster");
 
         $this->init();
         $this->processFixedArray = new SplFixedArray(static::PROCESS_MAX);
@@ -61,6 +61,6 @@ class Master
 
     private function logConsole($type, $msg)
     {
-        echo sprintf("[%s] [%s] %s %s", date("Y-m-d H:i:s"), $type, $msg, PHP_EOL);
+        Logger::log($type, $msg);
     }
 }
