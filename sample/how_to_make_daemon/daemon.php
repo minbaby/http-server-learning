@@ -29,7 +29,7 @@ if ($action == 'start') {
         echo "error";
     } elseif ($pid == 0) {
         posix_setsid();// 放弃 tty 控制权
-        chdir("/"); // 切换工作目录到 root 目录
+        chdir("/"); // 切换工作目录到 root 目录，释放当前目录
         fclose(STDIN); // 关闭自己标准流
         fclose(STDOUT);
         fclose(STDERR);
