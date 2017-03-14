@@ -12,7 +12,7 @@ $except = $write = null;
 
 do {
     // 需要重新填充
-    $read = [$server1, $server2];
+    $read = $write = [$server1, $server2];
     $flag = @stream_select($read, $write, $except, 0, 1000 * 1000);
     if ($flag === false) {
         logInfo("错误错误");
