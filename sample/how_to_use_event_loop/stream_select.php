@@ -1,5 +1,7 @@
 <?php
 
+// 不知道为什么 OSX 上会丢请求数据。
+
 @cli_set_process_title("[PHP]stream_select");
 $server1 = stream_socket_server("tcp://127.0.0.1:9876");
 $server2 = stream_socket_server("tcp://127.0.0.1:9875");
@@ -11,7 +13,6 @@ $except = $write = null;
 do {
     // 需要重新填充
     $read = [$server1, $server2];
-
     $flag = @stream_select($read, $write, $except, 0, 1000 * 1000);
     if ($flag === false) {
         logInfo("错误错误");
@@ -21,16 +22,7 @@ do {
             $socket = stream_socket_accept($r, 0);
             fwrite($socket, "a", 1);
 
-            $string = "";
-
-            while (true) {
-                $str = fread($socket, 1024);
-                if (strlen($str) === 0) {
-                    break;
-                }
-                $string .= $str;
-                var_dump($str);
-            }
+            $string = stream_socket_recvfrom($socket, 1024);
             $name = stream_socket_get_name($r, false);
             logInfo($string . ' <==> ' . $name);
             fclose($socket);
