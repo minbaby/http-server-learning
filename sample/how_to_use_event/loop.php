@@ -14,8 +14,8 @@ $eventManager = new EventBase();
 
 // 这里使用死循环的原因在于，我们还需要在循环开始之后进行一些处理，比如。。增加事件之类的
 // 如果可以确定不需要其他的处理，可以只使用时间循环。
+init($eventManager, $server1, $server2); // 这里的是持续事件，不是一次性事件
 while (true) {
-    init($eventManager, $server1, $server2);
     $eventManager->loop(EventBase::LOOP_ONCE);
 }
 
@@ -37,20 +37,17 @@ function logInfo($msg)
 
 function init($eventManager, $server1, $server2)
 {
-    $event1 = new Event($eventManager, $server1, Event::READ | Event::PERSIST, function($fd, $what, $args){
+    $event1 = new Event($eventManager, $server1, Event::READ | Event::PERSIST, function ($fd, $what, $args) {
         readAndClose($fd);
-    }
-    );
+    });
 
-    $event2 = new Event($eventManager, $server2, Event::READ | Event::PERSIST, function($fd, $what, $args){
+    $event2 = new Event($eventManager, $server2, Event::READ | Event::PERSIST, function ($fd, $what, $args) {
         readAndClose($fd);
-    }
-    );
+    });
 
-    $event3 = new Event($eventManager, -1, Event::TIMEOUT | Event::PERSIST, function($args){
+    $event3 = new Event($eventManager, -1, Event::TIMEOUT | Event::PERSIST, function ($args) {
         echo "timer\n";
-    }
-    );
+    });
 
     $event1->add();
     $event2->add();
