@@ -22,11 +22,14 @@ while (true) {
 function readAndClose($serverSocket)
 {
     $socket = stream_socket_accept($serverSocket, 0);
-    fwrite($socket, "a", 1);
 
     $string = stream_socket_recvfrom($socket, 1024);
     $name = stream_socket_get_name($serverSocket, false);
     logInfo($string . ' <==> ' . $name);
+
+    $str = sprintf("I got [%s]", $string);
+    fwrite($socket, $str, strlen($str));
+
     fclose($socket);
 }
 
