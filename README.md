@@ -8,6 +8,7 @@
 - [x] [step3] 多进程阻塞 http server, 实现 file index
 - [x] [step4] HttpParse 解析 http request/response
 - [x] [step5] 单进程 stream_select 版本 版本的 http server, 实现 file index
+- [x] [step6] pecl-event, 封装 event-loop
 - [ ] [stepN] 单进程非阻塞 select/epoll 等
 - [ ] [stepN] 多进程非阻塞
 
