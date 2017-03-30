@@ -30,5 +30,9 @@ $loop->addReadEvent($server2, function ($fd, $what, $args) {
     readAndClose($fd);
 });
 
+$loop->addSignalEvent(SIGUSR2, function () use ($loop) {
+    echo "Got SIGUSR2 && EXIT";
+//    $loop->stop();
+});
 
 $loop->run();

@@ -2,6 +2,8 @@
 
 namespace Minbaby\Loop;
 
+
+// 未处理重复注册！！！。
 class EventLoop implements Loop
 {
 
@@ -10,7 +12,7 @@ class EventLoop implements Loop
     /**
      * @var \SplObjectStorage
      */
-    private $timeEvents;
+    private $events;
 
     /**
      * @var \EventBase
@@ -26,7 +28,7 @@ class EventLoop implements Loop
     {
         $this->eventBase = new \EventBase($cfg);
 
-        $this->timeEvents = new \SplObjectStorage();
+        $this->events = new \SplObjectStorage();
     }
 
     /**
@@ -67,7 +69,7 @@ class EventLoop implements Loop
         // 猜测原因是。。。变量作用域原因
         // 调用函数之后，$event 变量被 gc 掉。
         // 但是在事件循环中还需要这个变量，但是这个事件已经被 gc 掉了。
-        $this->timeEvents->attach($event);
+        $this->events->attach($event);
         return $event;
     }
 
@@ -75,7 +77,7 @@ class EventLoop implements Loop
     {
         $event = new \Event($this->eventBase, $resourceFd, \Event::READ | \Event::PERSIST, $callback);
         $event->add();
-        $this->timeEvents->attach($event);
+        $this->events->attach($event);
         return $event;
     }
 
@@ -83,13 +85,21 @@ class EventLoop implements Loop
     {
         $event = new \Event($this->eventBase, $resourceFd, \Event::WRITE | \Event::PERSIST, $callback);
         $event->add();
-        $this->timeEvents->attach($event);
+        $this->events->attach($event);
         return $event;
     }
 
     public function removeEvent(\Event $event)
     {
-        $this->timeEvents->detach($event);
+        $this->events->detach($event);
         $event->free();
+    }
+
+    public function addSignalEvent($sig, callable $callback): \Event
+    {
+        $event = \Event::signal($this->eventBase, $sig, $callback);
+        $event->add();
+        $this->events->attach($event);
+        return $event;
     }
 }

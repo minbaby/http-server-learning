@@ -19,4 +19,6 @@ interface Loop
     public function addReadEvent($resourceFd, callable $callback): \Event;
 
     public function addWriteEvent($resourceFd, callable $callback): \Event;
+
+    public function addSignalEvent($sig, callable $callback): \Event;
 }
