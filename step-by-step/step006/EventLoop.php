@@ -4,6 +4,8 @@ namespace Minbaby\Loop;
 
 
 // 未处理重复注册！！！。
+use Minbaby\Monitor\MemoryMonitor;
+
 class EventLoop implements Loop
 {
 
@@ -29,6 +31,8 @@ class EventLoop implements Loop
         $this->eventBase = new \EventBase($cfg);
 
         $this->events = new \SplObjectStorage();
+
+        MemoryMonitor::init();
     }
 
     /**
@@ -42,7 +46,7 @@ class EventLoop implements Loop
         $this->running = true;
 
         $this->addTimer(1, function () {
-            echo "tick", PHP_EOL;
+            logInfo(MemoryMonitor::prettyPrint(true));
         }, true);
 
         while ($this->running) {

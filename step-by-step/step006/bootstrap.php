@@ -3,6 +3,7 @@
 include "Loop.php";
 include "EventLoop.php";
 include "helper.php";
+include "monitor.php";
 
 $loop = new \Minbaby\Loop\EventLoop();
 
