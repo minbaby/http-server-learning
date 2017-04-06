@@ -1,0 +1,28 @@
+{
+  "name": "Minbaby/HttpServer",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "minbaby.zhang",
+      "email": "zhangshaomin_1990@126.com"
+    }
+  ],
+  "require": {
+    "symfony/http-foundation": "^3.2",
+    "symfony/routing": "^3.2",
+    "psr/http-message": "^1.0",
+    "guzzlehttp/psr7": "^1.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Minbaby\\HttpServer\\": "Minbaby/HttpServer",
+      "Minbaby\\FastCgi\\": "FastCgi",
+      "Minbaby\\Controller\\": "Controller"
+    },
+    "files":[
+      "const.php",
+      "helper.php"
+    ]
+  }
+}
