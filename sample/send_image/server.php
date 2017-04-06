@@ -80,7 +80,8 @@ class SocketBuf
         $this->buffer .= $buf;
 
         if (strlen($this->buffer) >= self::HEADER_LEN && $this->header === 0) {
-            $unpack = unpack('isize/', $this->buffer);// 这里需要截取需要的那一部分么？
+            $headerData = substr($this->buffer, 0, self::HEADER_LEN);
+            $unpack = unpack('isize/', $headerData);// 截取需要的数据，进行 unpack
             $this->header = $unpack['size'];
         } else {
             if (strlen($this->buffer) > $this->header + self::HEADER_LEN) {
@@ -92,7 +93,8 @@ class SocketBuf
 
                 // 解析剩下的可能的包
                 while (strlen($this->buffer) >= $this->header + self::HEADER_LEN) {
-                    $unpack = unpack('isize/', $this->buffer); // 这里需要截取需要的那一部分么？
+                    $headerData = substr($this->buffer, 0, self::HEADER_LEN);
+                    $unpack = unpack('isize/', $headerData);
                     $this->header = $unpack['size'];
                     $this->body[] = substr($this->buffer, self::HEADER_LEN, $this->header);// 先解析一个包
                     $this->buffer = substr($this->buffer, $this->header + self::HEADER_LEN);
