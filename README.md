@@ -9,10 +9,10 @@
 - [x] [step4] HttpParse 解析 http request/response
 - [x] [step5] 单进程 stream_select 版本 版本的 http server, 实现 file index
 - [x] [step6] pecl-event, 封装 event-loop
-- [ ] [step7] 较为完整的 http server
+- [x] [step7] 较为完整的 http server
 
 
-# TODO
+## TODO
 
 - rpc
 - websocket ?
@@ -20,7 +20,7 @@
 - 平滑重启如果做？
 
 
-# 重要参考文档
+## 重要参考文档
 
 - [Fast portable non-blocking network programming with Libevent](http://www.wangafu.net/~nickm/libevent-book/TOC.html)
 - [RPC 的概念模型与实现解析](http://mp.weixin.qq.com/s?__biz=MzAxMTEyOTQ5OQ==&mid=2650610547&idx=1&sn=2cae08dbf62d9a6c2f964ffd440c0077)
@@ -30,3 +30,7 @@
 
 - redis 协议解析
 - mysql 协议解析
+
+## 结束
+
+就这样吧, 更多的东西可以参考 react/php 这个项目。
