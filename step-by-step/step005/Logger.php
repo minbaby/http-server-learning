@@ -1,6 +1,6 @@
 <?php
 
-namespace Minbaby\HttpServer;
+namespace Minbaby;
 
 class Logger
 {
